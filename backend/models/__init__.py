@@ -1,4 +1,6 @@
-"""Sign Language Models Module"""
+"""
+Sign Language Interpreter Models Module
+"""
 
 from .sign_language_model import (
     ViTSignLanguage,
@@ -13,6 +15,11 @@ from .emotion_detector import (
     LightweightEmotionDetector
 )
 
+from .gesture_trigger import (
+    GestureRecognitionNet,
+    TriggerGestureDetector
+)
+
 __all__ = [
     'ViTSignLanguage',
     'ImprovedViTWithConvolutions',
@@ -20,5 +27,7 @@ __all__ = [
     'create_model',
     'EmotionCNN',
     'EmotionDetector',
-    'LightweightEmotionDetector'
+    'LightweightEmotionDetector',
+    'GestureRecognitionNet',
+    'TriggerGestureDetector'
 ]
