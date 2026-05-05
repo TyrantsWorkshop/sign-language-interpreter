@@ -16,6 +16,35 @@ function App() {
     llm_response: null,
     audio: null
   });
+  const [liveSequence, setLiveSequence] = React.useState([]);
+  const [settings, setSettings] = React.useState({
+    useLLM: true,
+    useTranslation: false,
+    targetLanguage: 'English'
+  });
+
+  const handleRecognition = (data) => {
+    setRecognitionData(prev => ({ ...prev, ...data }));
+
+    if (data.status === 'recording_started') {
+      setLiveSequence([]);
+    }
+
+    if (data.status === 'recognizing' && data.detected_sign) {
+      setLiveSequence(prev => {
+        const lastWord = prev[prev.length - 1];
+        if (lastWord === data.detected_sign) {
+          return prev;
+        }
+        return [...prev, data.detected_sign];
+      });
+    }
+
+    if (data.status === 'recording_ended' && data.recognized_sequence) {
+      const words = data.recognized_sequence.split(' ').filter(Boolean);
+      setLiveSequence(words);
+    }
+  };
 
   return (
     <div className="App">
@@ -48,13 +77,18 @@ function App() {
       <div className="content">
         {activeTab === 'live' && (
           <div className="live-section">
-            <VideoFeed onRecognition={setRecognitionData} />
-            <RecognitionDisplay data={recognitionData} />
+            <VideoFeed onRecognition={handleRecognition} />
+            <RecognitionDisplay
+              data={recognitionData}
+              liveSequence={liveSequence}
+              settings={settings}
+              onSettingsChange={setSettings}
+            />
           </div>
         )}
         
         {activeTab === 'upload' && (
-          <VideoUpload onRecognition={setRecognitionData} />
+          <VideoUpload onRecognition={handleRecognition} />
         )}
         
         {activeTab === 'learn' && (
