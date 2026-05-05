@@ -1,11 +1,40 @@
 import React from 'react';
 
-const RecognitionDisplay = ({ data }) => {
+const LANGUAGE_OPTIONS = [
+  'English',
+  'Korean',
+  'Spanish',
+  'French',
+  'German',
+  'Japanese',
+  'Chinese',
+  'Hindi',
+  'Arabic',
+  'Portuguese'
+];
+
+const RecognitionDisplay = ({ data, liveSequence = [], settings, onSettingsChange }) => {
   const playAudio = (audioBase64) => {
     if (!audioBase64) return;
     const audio = new Audio(`data:audio/mp3;base64,${audioBase64}`);
     audio.play();
   };
+
+  const handleToggle = (key) => (event) => {
+    onSettingsChange({
+      ...settings,
+      [key]: event.target.checked
+    });
+  };
+
+  const handleLanguageChange = (event) => {
+    onSettingsChange({
+      ...settings,
+      targetLanguage: event.target.value
+    });
+  };
+
+  const liveWords = liveSequence.length ? liveSequence.join(' ') : 'Waiting for signs…';
 
   return (
     <div className="recognition-display">
@@ -18,6 +47,53 @@ const RecognitionDisplay = ({ data }) => {
         {data.status === 'recording_ended' && '✅ Processed'}
       </div>
 
+      <div className="settings-panel">
+        <h3>LLM & Translation Settings</h3>
+        <div className="toggle-row">
+          <label className="toggle">
+            <input
+              type="checkbox"
+              checked={settings.useLLM}
+              onChange={handleToggle('useLLM')}
+            />
+            <span>Use LLM refinement</span>
+          </label>
+          <label className="toggle">
+            <input
+              type="checkbox"
+              checked={settings.useTranslation}
+              onChange={handleToggle('useTranslation')}
+              disabled={!settings.useLLM}
+            />
+            <span>Translate output</span>
+          </label>
+        </div>
+        <div className="select-row">
+          <label className="select-field">
+            Target language
+            <select
+              value={settings.targetLanguage}
+              onChange={handleLanguageChange}
+              disabled={!settings.useLLM || !settings.useTranslation}
+            >
+              {LANGUAGE_OPTIONS.map(language => (
+                <option key={language} value={language}>
+                  {language}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <p className="settings-note">
+          These settings will apply once the LLM API is connected.
+        </p>
+      </div>
+
+      <div className="recognized-text live-sequence">
+        <h3>Live Words</h3>
+        <div className="text-output">{liveWords}</div>
+      </div>
+
       {data.emotion && (
         <div className="emotion-display">
           <h3>Your Emotion</h3>
@@ -26,7 +102,7 @@ const RecognitionDisplay = ({ data }) => {
             {data.emotion === 'Sad' && '😢'}
             {data.emotion === 'Angry' && '😠'}
             {data.emotion === 'Neutral' && '😐'}
-            {data.emotion === 'Surprised' && '😲'}
+            {(data.emotion === 'Surprise' || data.emotion === 'Surprised') && '😲'}
             {data.emotion === 'Fear' && '😨'}
             {data.emotion === 'Disgust' && '🤢'}
             {' '}{data.emotion}
