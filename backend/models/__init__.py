@@ -9,10 +9,12 @@ from .sign_language_model import (
     create_model
 )
 
-from .gesture_trigger import (
-    GestureRecognitionNet,
-    TriggerGestureDetector
-)
+try:
+    from .gesture_trigger import (
+        TriggerGestureDetector
+    )
+except Exception:  # pragma: no cover - optional dependency
+    TriggerGestureDetector = None
 
 try:
     from .emotion_detector import (
@@ -30,7 +32,6 @@ __all__ = [
     'ImprovedViTWithConvolutions',
     'MultiScaleViT',
     'create_model',
-    'GestureRecognitionNet',
     'TriggerGestureDetector',
     'EmotionCNN',
     'EmotionDetector',
